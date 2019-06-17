@@ -1,0 +1,4 @@
+---
+# defaults file for ansible-role-pxe
+pxe_esx_iso_url: https://downloads.dell.com/FOLDER05577989M/1/VMware-VMvisor-Installer-6.7.0.update02-13006603.x86_64-DellEMC_Customized-A00.iso
+pxe_esx_iso_checksum: 'md5:0be75d72803fe94bec06bf63ac811fe6'

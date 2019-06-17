@@ -1,0 +1,40 @@
+---
+- name: create directory to hold ISOs
+  file:
+    path: /opt/iso
+    state: directory
+
+- name: check if ISO already downloaded
+  stat:
+    path: "/opt/iso/{{ pxe_esx_iso_url | basename }}"
+  register: l_stat_esxi_iso
+
+- name: Download ESXi ISO
+  get_url:
+    url: "{{ pxe_esx_iso_url }}"
+    dest: /opt/iso
+    checksum: "{{ pxe_esx_iso_checksum }}"
+  when: not l_stat_esxi_iso.stat.exists
+
+- name: mount ISO to tmp directory
+  mount:
+    path: "/mnt/{{ (pxe_esx_iso_url | basename | splitext)[0] }}"
+    src: "/opt/iso/{{ pxe_esx_iso_url | basename }}"
+    fstype: iso9660
+    opts: loop
+    state: mounted
+  register: pxe_mount_iso
+
+- name: check for boot.cfg in tftpboot directory
+  stat:
+    path: "/var/lib/tftpboot/{{ (pxe_esx_iso_url | basename | splitext)[0] }}/boot.cfg"
+  register: l_stat_esxi_iso_boot_cfg
+
+- name: copy ISO contents to tftpboot directory
+  command: "cp -r /mnt/{{ (pxe_esx_iso_url | basename | splitext)[0] }} /var/lib/tftpboot"
+  when: not l_stat_esxi_iso_boot_cfg.stat.exists
+
+- name: modify boot.cfg
+  template:
+    src: boot.cfg.j2
+    dest: "/var/lib/tftpboot/{{ (pxe_esx_iso_url | basename | splitext)[0] }}/boot.cfg"

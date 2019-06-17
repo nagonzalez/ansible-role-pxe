@@ -1,0 +1,10 @@
+---
+- name: create pxelinux.cfg directory
+  file:
+    state: directory
+    path: /var/lib/tftpboot/pxelinux.cfg
+
+- name: set default pxelinx install screen
+  template:
+    src: default.j2
+    dest: /var/lib/tftpboot/pxelinux.cfg/default

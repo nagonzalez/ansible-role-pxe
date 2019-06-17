@@ -1,0 +1,6 @@
+DEFAULT install
+NOHALT 1
+LABEL install
+ KERNEL {{ (pxe_esx_iso_url | basename | splitext)[0] }}/mboot.c32
+ APPEND -c {{ (pxe_esx_iso_url | basename | splitext)[0] }}/boot.cfg
+ IPAPPEND 2

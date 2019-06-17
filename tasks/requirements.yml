@@ -1,0 +1,51 @@
+---
+- name: install required packages
+  package:
+    name: "{{ item }}"
+  loop:
+    - tftp
+    - tftp-server
+    - syslinux
+
+- name: modify tftp service file so it can start on reboot
+  ini_file:
+    path: /usr/lib/systemd/system/tftp.service
+    section: Install
+    option: WantedBy
+    value: multi-user.target
+    no_extra_spaces: true
+  register: tftp_service_file_reboot
+
+- name: force systemd to reload config
+  systemd:
+    daemon_reload: true
+  when:
+    - tftp_service_file_reboot.changed
+  tags:
+    - skip_ansible_lint
+
+- name: ensure tftp services are enabled & running
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  loop:
+    - tftp
+
+- name: populate service facts
+  service_facts:
+
+- name: configure firewalld if required
+  firewalld:
+    service: tftp
+    permanent: true
+    state: enabled
+  when:
+    - "'firewalld' in services"
+    - services['firewalld.service']['state'] == 'running'
+
+- name: copy pxelinux.0 file to root of tftp server
+  copy:
+    remote_src: true
+    src: /usr/share/syslinux/pxelinux.0
+    dest: /var/lib/tftpboot

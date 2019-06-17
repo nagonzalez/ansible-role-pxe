@@ -1,0 +1,10 @@
+---
+
+# pxe booting requirements
+- include: requirements.yml
+
+# support esxi pxe booting
+- include: esxi.yml
+
+# configure pxe install screen
+- include: pxe.yml
